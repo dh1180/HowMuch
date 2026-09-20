@@ -1,0 +1,70 @@
+---
+import ToolLayout from "../components/ToolLayout.astro";
+---
+<ToolLayout
+  title="온도 변환"
+  description="섭씨(°C), 화씨(°F), 켈빈(K)을 원하는 단위로 변환합니다."
+  category="생활"
+  note="켈빈은 절대온도 단위이므로 0K 미만의 값은 물리적으로 유효하지 않습니다."
+>
+  <div class="grid sm:grid-cols-2 gap-4">
+    <label>
+      <span class="label">변환할 온도</span>
+      <div class="flex gap-2">
+        <input id="from-value" class="input" type="number" inputmode="decimal" value="25" step="any" />
+        <select id="from-unit" class="input !w-28" aria-label="원본 온도 단위">
+          <option value="C">°C</option>
+          <option value="F">°F</option>
+          <option value="K">K</option>
+        </select>
+      </div>
+    </label>
+    <label>
+      <span class="label">대상 단위</span>
+      <select id="to-unit" class="input">
+        <option value="F">화씨 (°F)</option>
+        <option value="C">섭씨 (°C)</option>
+        <option value="K">켈빈 (K)</option>
+      </select>
+    </label>
+  </div>
+  <div class="result-box mt-5" aria-live="polite">
+    <p class="text-sm font-bold text-indigo-700">환산 결과</p>
+    <p id="result" class="result-value mt-1">77°F</p>
+    <p id="detail" class="mt-2 text-sm text-slate-600">25°C 기준</p>
+  </div>
+
+  <script>
+    const valueEl = document.querySelector<HTMLInputElement>("#from-value")!;
+    const fromEl = document.querySelector<HTMLSelectElement>("#from-unit")!;
+    const toEl = document.querySelector<HTMLSelectElement>("#to-unit")!;
+    const result = document.querySelector<HTMLElement>("#result")!;
+    const detail = document.querySelector<HTMLElement>("#detail")!;
+    const symbols: Record<string, string> = { C: "°C", F: "°F", K: "K" };
+    const fmt = (value: number) =>
+      new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 4 }).format(value);
+
+    function toCelsius(value: number, unit: string) {
+      if (unit === "F") return (value - 32) * 5 / 9;
+      if (unit === "K") return value - 273.15;
+      return value;
+    }
+
+    function fromCelsius(value: number, unit: string) {
+      if (unit === "F") return value * 9 / 5 + 32;
+      if (unit === "K") return value + 273.15;
+      return value;
+    }
+
+    function convert() {
+      const value = Number(valueEl.value);
+      if (!Number.isFinite(value)) return;
+      const converted = fromCelsius(toCelsius(value, fromEl.value), toEl.value);
+      result.textContent = `${fmt(converted)}${symbols[toEl.value]}`;
+      detail.textContent = `${fmt(value)}${symbols[fromEl.value]} 기준`;
+    }
+
+    [valueEl, fromEl, toEl].forEach((el) => el.addEventListener("input", convert));
+    convert();
+  </script>
+</ToolLayout>
