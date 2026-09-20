@@ -1,0 +1,70 @@
+---
+import ToolLayout from "../components/ToolLayout.astro";
+---
+<ToolLayout
+  title="평 · 제곱미터 변환"
+  description="아파트와 부동산 면적에서 자주 쓰는 평(坪)과 제곱미터(㎡)를 바로 환산합니다."
+  category="생활"
+  note="1평 = 400/121㎡ ≈ 3.305785㎡를 기준으로 계산합니다. 부동산 표시는 법정 계량단위인 ㎡를 확인하는 것이 가장 정확합니다."
+>
+  <div class="calc-grid">
+    <label>
+      <span class="label">평</span>
+      <input id="pyeong" class="input" type="number" inputmode="decimal" value="24" min="0" step="any" />
+    </label>
+    <button id="swap" class="swap btn btn-soft mb-0.5" type="button" aria-label="입력 방향 바꾸기">⇄</button>
+    <label>
+      <span class="label">제곱미터 (㎡)</span>
+      <input id="sqm" class="input" type="number" inputmode="decimal" min="0" step="any" />
+    </label>
+  </div>
+  <div class="result-box mt-5" aria-live="polite">
+    <p class="text-sm font-bold text-indigo-700">환산 결과</p>
+    <p id="result" class="result-value mt-1">79.34㎡</p>
+    <p id="detail" class="mt-2 text-sm text-slate-600">24평 기준</p>
+  </div>
+  <div class="mt-5 flex flex-wrap gap-2" aria-label="자주 쓰는 평수">
+    {[18, 24, 32, 34, 40].map((value) => <button class="preset btn btn-soft" data-value={value} type="button">{value}평</button>)}
+  </div>
+
+  <script>
+    const PYEONG_TO_SQM = 400 / 121;
+    const pyeong = document.querySelector<HTMLInputElement>("#pyeong")!;
+    const sqm = document.querySelector<HTMLInputElement>("#sqm")!;
+    const result = document.querySelector<HTMLElement>("#result")!;
+    const detail = document.querySelector<HTMLElement>("#detail")!;
+    let source: "pyeong" | "sqm" = "pyeong";
+
+    const fmt = (value: number, digits = 2) =>
+      new Intl.NumberFormat("ko-KR", { maximumFractionDigits: digits }).format(value);
+
+    function fromPyeong() {
+      const value = Number(pyeong.value);
+      if (!Number.isFinite(value)) return;
+      const converted = value * PYEONG_TO_SQM;
+      sqm.value = String(Number(converted.toFixed(4)));
+      result.textContent = `${fmt(converted)}㎡`;
+      detail.textContent = `${fmt(value, 4)}평 기준`;
+      source = "pyeong";
+    }
+
+    function fromSqm() {
+      const value = Number(sqm.value);
+      if (!Number.isFinite(value)) return;
+      const converted = value / PYEONG_TO_SQM;
+      pyeong.value = String(Number(converted.toFixed(4)));
+      result.textContent = `${fmt(converted)}평`;
+      detail.textContent = `${fmt(value, 4)}㎡ 기준`;
+      source = "sqm";
+    }
+
+    pyeong.addEventListener("input", fromPyeong);
+    sqm.addEventListener("input", fromSqm);
+    document.querySelector("#swap")?.addEventListener("click", () => source === "pyeong" ? fromSqm() : fromPyeong());
+    document.querySelectorAll<HTMLButtonElement>(".preset").forEach((button) => button.addEventListener("click", () => {
+      pyeong.value = button.dataset.value ?? "24";
+      fromPyeong();
+    }));
+    fromPyeong();
+  </script>
+</ToolLayout>
