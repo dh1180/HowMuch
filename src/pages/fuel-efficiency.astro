@@ -1,0 +1,57 @@
+---
+import ToolLayout from "../components/ToolLayout.astro";
+---
+<ToolLayout
+  title="연비 변환"
+  description="한국에서 익숙한 km/L와 유럽 등에서 쓰는 L/100km를 서로 환산합니다."
+  category="자동차"
+  note="두 단위는 역수 관계이므로 100 ÷ 값으로 변환합니다. 0은 유효한 변환값이 아닙니다."
+>
+  <div class="calc-grid">
+    <label>
+      <span class="label">km/L</span>
+      <input id="kml" class="input" type="number" inputmode="decimal" value="15" min="0" step="any" />
+    </label>
+    <span class="swap btn btn-soft mb-0.5 cursor-default">⇄</span>
+    <label>
+      <span class="label">L/100km</span>
+      <input id="l100" class="input" type="number" inputmode="decimal" min="0" step="any" />
+    </label>
+  </div>
+  <div class="result-box mt-5" aria-live="polite">
+    <p class="text-sm font-bold text-indigo-700">환산 결과</p>
+    <p id="result" class="result-value mt-1">6.67L/100km</p>
+    <p id="detail" class="mt-2 text-sm text-slate-600">15km/L 기준</p>
+  </div>
+
+  <script>
+    const kml = document.querySelector<HTMLInputElement>("#kml")!;
+    const l100 = document.querySelector<HTMLInputElement>("#l100")!;
+    const result = document.querySelector<HTMLElement>("#result")!;
+    const detail = document.querySelector<HTMLElement>("#detail")!;
+    const fmt = (value: number) =>
+      new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 3 }).format(value);
+
+    function fromKml() {
+      const value = Number(kml.value);
+      if (!(value > 0)) return;
+      const converted = 100 / value;
+      l100.value = String(Number(converted.toFixed(5)));
+      result.textContent = `${fmt(converted)}L/100km`;
+      detail.textContent = `${fmt(value)}km/L 기준`;
+    }
+
+    function fromL100() {
+      const value = Number(l100.value);
+      if (!(value > 0)) return;
+      const converted = 100 / value;
+      kml.value = String(Number(converted.toFixed(5)));
+      result.textContent = `${fmt(converted)}km/L`;
+      detail.textContent = `${fmt(value)}L/100km 기준`;
+    }
+
+    kml.addEventListener("input", fromKml);
+    l100.addEventListener("input", fromL100);
+    fromKml();
+  </script>
+</ToolLayout>
