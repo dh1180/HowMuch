@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "npm@11.6.2",
+  "engines": {
+    "node": ">=22.12 <23"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
@@ -12,14 +16,14 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
-    "@astrojs/sitemap": "latest",
-    "@tailwindcss/vite": "latest",
-    "astro": "latest",
-    "tailwindcss": "latest"
+    "@astrojs/sitemap": "3.7.4",
+    "@tailwindcss/vite": "4.3.3",
+    "astro": "7.3.3",
+    "tailwindcss": "4.3.3"
   },
   "devDependencies": {
-    "@astrojs/check": "latest",
-    "typescript": "latest",
-    "wrangler": "^4.0.0"
+    "@astrojs/check": "0.9.10",
+    "typescript": "6.0.3",
+    "wrangler": "4.135.0"
   }
 }
