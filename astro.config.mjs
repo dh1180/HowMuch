@@ -2,11 +2,9 @@ import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 
-const site = process.env.SITE_URL?.trim();
-
 export default defineConfig({
-  ...(site ? { site } : {}),
-  integrations: site ? [sitemap()] : [],
+  site: "https://how-much.kro.kr",
+  integrations: [sitemap()],
   vite: {
     plugins: [tailwindcss()],
   },
