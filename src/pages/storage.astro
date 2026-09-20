@@ -1,0 +1,76 @@
+---
+import ToolLayout from "../components/ToolLayout.astro";
+---
+<ToolLayout
+  title="데이터 용량 변환"
+  description="십진 단위(KB·MB·GB·TB)와 이진 단위(KiB·MiB·GiB·TiB)를 정확히 변환합니다."
+  category="데이터"
+  note="KB/MB/GB/TB는 1,000 단위, KiB/MiB/GiB/TiB는 1,024 단위(IEC 이진 접두어)로 계산합니다."
+>
+  <div class="grid sm:grid-cols-2 gap-4">
+    <label>
+      <span class="label">변환할 값</span>
+      <div class="flex gap-2">
+        <input id="from-value" class="input" type="number" inputmode="decimal" value="1024" min="0" step="any" />
+        <select id="from-unit" class="input !w-28" aria-label="원본 단위"></select>
+      </div>
+    </label>
+    <label>
+      <span class="label">변환 결과</span>
+      <div class="flex gap-2">
+        <input id="to-value" class="input" type="text" readonly />
+        <select id="to-unit" class="input !w-28" aria-label="대상 단위"></select>
+      </div>
+    </label>
+  </div>
+  <div class="result-box mt-5" aria-live="polite">
+    <p class="text-sm font-bold text-indigo-700">환산 결과</p>
+    <p id="result" class="result-value mt-1">1GiB</p>
+    <p id="detail" class="mt-2 text-sm text-slate-600">1024MiB 기준</p>
+  </div>
+
+  <script>
+    const units: Record<string, number> = {
+      B: 1,
+      KB: 1e3,
+      MB: 1e6,
+      GB: 1e9,
+      TB: 1e12,
+      KiB: 2 ** 10,
+      MiB: 2 ** 20,
+      GiB: 2 ** 30,
+      TiB: 2 ** 40,
+    };
+
+    const fromValue = document.querySelector<HTMLInputElement>("#from-value")!;
+    const fromUnit = document.querySelector<HTMLSelectElement>("#from-unit")!;
+    const toValue = document.querySelector<HTMLInputElement>("#to-value")!;
+    const toUnit = document.querySelector<HTMLSelectElement>("#to-unit")!;
+    const result = document.querySelector<HTMLElement>("#result")!;
+    const detail = document.querySelector<HTMLElement>("#detail")!;
+
+    Object.keys(units).forEach((unit) => {
+      fromUnit.add(new Option(unit, unit));
+      toUnit.add(new Option(unit, unit));
+    });
+
+    fromUnit.value = "MiB";
+    toUnit.value = "GiB";
+
+    const fmt = (value: number) =>
+      new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 8 }).format(value);
+
+    function convert() {
+      const value = Number(fromValue.value);
+      if (!Number.isFinite(value)) return;
+      const converted = value * units[fromUnit.value] / units[toUnit.value];
+      const formatted = fmt(converted);
+      toValue.value = formatted;
+      result.textContent = `${formatted}${toUnit.value}`;
+      detail.textContent = `${fmt(value)}${fromUnit.value} 기준`;
+    }
+
+    [fromValue, fromUnit, toUnit].forEach((el) => el.addEventListener("input", convert));
+    convert();
+  </script>
+</ToolLayout>
