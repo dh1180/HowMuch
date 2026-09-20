@@ -1,0 +1,63 @@
+---
+import ToolLayout from "../components/ToolLayout.astro";
+---
+<ToolLayout
+  title="Mbps · MB/s 변환"
+  description="통신사가 표시하는 Mbps와 파일 다운로드에서 보는 MB/s의 차이를 바로 계산합니다."
+  category="인터넷"
+  note="1 Byte = 8 bit이므로 이론상 MB/s = Mbps ÷ 8입니다. 실제 속도는 Wi-Fi 품질, 프로토콜 오버헤드, 서버 상태 등에 따라 더 낮을 수 있습니다."
+>
+  <div class="calc-grid">
+    <label>
+      <span class="label">인터넷 속도 (Mbps)</span>
+      <input id="mbps" class="input" type="number" inputmode="decimal" value="500" min="0" step="any" />
+    </label>
+    <span class="swap btn btn-soft mb-0.5 cursor-default" aria-hidden="true">÷ 8</span>
+    <label>
+      <span class="label">초당 다운로드 (MB/s)</span>
+      <input id="mbs" class="input" type="number" inputmode="decimal" min="0" step="any" />
+    </label>
+  </div>
+  <div class="result-box mt-5" aria-live="polite">
+    <p class="text-sm font-bold text-indigo-700">이론상 최대 전송량</p>
+    <p id="result" class="result-value mt-1">62.5MB/s</p>
+    <p id="detail" class="mt-2 text-sm text-slate-600">500Mbps 회선 기준</p>
+  </div>
+  <div class="mt-5 flex flex-wrap gap-2">
+    {[100, 500, 1000, 2500, 10000].map((value) => <button class="preset btn btn-soft" data-value={value} type="button">{value >= 1000 ? value / 1000 + "Gbps" : value + "Mbps"}</button>)}
+  </div>
+
+  <script>
+    const mbps = document.querySelector<HTMLInputElement>("#mbps")!;
+    const mbs = document.querySelector<HTMLInputElement>("#mbs")!;
+    const result = document.querySelector<HTMLElement>("#result")!;
+    const detail = document.querySelector<HTMLElement>("#detail")!;
+    const fmt = (v: number) => new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 3 }).format(v);
+
+    function fromMbps() {
+      const value = Number(mbps.value);
+      if (!Number.isFinite(value)) return;
+      const converted = value / 8;
+      mbs.value = String(Number(converted.toFixed(4)));
+      result.textContent = `${fmt(converted)}MB/s`;
+      detail.textContent = `${fmt(value)}Mbps 회선 기준`;
+    }
+
+    function fromMbs() {
+      const value = Number(mbs.value);
+      if (!Number.isFinite(value)) return;
+      const converted = value * 8;
+      mbps.value = String(Number(converted.toFixed(4)));
+      result.textContent = `${fmt(converted)}Mbps`;
+      detail.textContent = `${fmt(value)}MB/s 전송량 기준`;
+    }
+
+    mbps.addEventListener("input", fromMbps);
+    mbs.addEventListener("input", fromMbs);
+    document.querySelectorAll<HTMLButtonElement>(".preset").forEach((button) => button.addEventListener("click", () => {
+      mbps.value = button.dataset.value ?? "500";
+      fromMbps();
+    }));
+    fromMbps();
+  </script>
+</ToolLayout>
