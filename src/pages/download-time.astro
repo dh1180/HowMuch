@@ -1,0 +1,85 @@
+---
+import ToolLayout from "../components/ToolLayout.astro";
+---
+<ToolLayout
+  title="다운로드 시간 계산"
+  description="파일 크기와 인터넷 속도를 입력하면 이론상 다운로드 완료 시간을 계산합니다."
+  category="인터넷"
+  note="네트워크 속도는 bit/s, 파일 크기는 Byte 기준으로 환산합니다. 기본 GB/MB는 1,000 단위의 십진 접두어를 사용하며 실제 다운로드 시간은 더 길 수 있습니다."
+>
+  <div class="grid sm:grid-cols-2 gap-4">
+    <label>
+      <span class="label">파일 크기</span>
+      <div class="flex gap-2">
+        <input id="size" class="input" type="number" inputmode="decimal" value="10" min="0" step="any" />
+        <select id="size-unit" class="input !w-28" aria-label="파일 크기 단위">
+          <option value="MB">MB</option>
+          <option value="GB" selected>GB</option>
+          <option value="TB">TB</option>
+          <option value="MiB">MiB</option>
+          <option value="GiB">GiB</option>
+        </select>
+      </div>
+    </label>
+    <label>
+      <span class="label">인터넷 속도</span>
+      <div class="flex gap-2">
+        <input id="speed" class="input" type="number" inputmode="decimal" value="500" min="0" step="any" />
+        <select id="speed-unit" class="input !w-28" aria-label="인터넷 속도 단위">
+          <option value="Mbps" selected>Mbps</option>
+          <option value="Gbps">Gbps</option>
+        </select>
+      </div>
+    </label>
+  </div>
+  <div class="result-box mt-5" aria-live="polite">
+    <p class="text-sm font-bold text-indigo-700">예상 다운로드 시간</p>
+    <p id="result" class="result-value mt-1">2분 40초</p>
+    <p id="detail" class="mt-2 text-sm text-slate-600">평균 62.5MB/s가 유지된다고 가정</p>
+  </div>
+
+  <script>
+    const size = document.querySelector<HTMLInputElement>("#size")!;
+    const sizeUnit = document.querySelector<HTMLSelectElement>("#size-unit")!;
+    const speed = document.querySelector<HTMLInputElement>("#speed")!;
+    const speedUnit = document.querySelector<HTMLSelectElement>("#speed-unit")!;
+    const result = document.querySelector<HTMLElement>("#result")!;
+    const detail = document.querySelector<HTMLElement>("#detail")!;
+
+    const bytesPerUnit: Record<string, number> = {
+      MB: 1e6,
+      GB: 1e9,
+      TB: 1e12,
+      MiB: 2 ** 20,
+      GiB: 2 ** 30,
+    };
+
+    function formatDuration(seconds: number) {
+      if (!Number.isFinite(seconds) || seconds < 0) return "계산할 수 없음";
+      if (seconds < 1) return "1초 미만";
+      const rounded = Math.ceil(seconds);
+      const h = Math.floor(rounded / 3600);
+      const m = Math.floor((rounded % 3600) / 60);
+      const s = rounded % 60;
+      return [h && `${h}시간`, m && `${m}분`, s && `${s}초`].filter(Boolean).join(" ") || "0초";
+    }
+
+    function calculate() {
+      const sizeValue = Number(size.value);
+      const speedValue = Number(speed.value);
+      if (!(sizeValue >= 0) || !(speedValue > 0)) {
+        result.textContent = "값을 확인해 주세요";
+        detail.textContent = "속도는 0보다 커야 합니다.";
+        return;
+      }
+      const bytes = sizeValue * bytesPerUnit[sizeUnit.value];
+      const mbps = speedValue * (speedUnit.value === "Gbps" ? 1000 : 1);
+      const seconds = (bytes * 8) / (mbps * 1e6);
+      result.textContent = formatDuration(seconds);
+      detail.textContent = `평균 ${new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 2 }).format(mbps / 8)}MB/s가 유지된다고 가정`;
+    }
+
+    [size, sizeUnit, speed, speedUnit].forEach((el) => el.addEventListener("input", calculate));
+    calculate();
+  </script>
+</ToolLayout>
