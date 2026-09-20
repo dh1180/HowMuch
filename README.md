@@ -2,14 +2,14 @@
 
 > 필요한 계산, 바로.
 
-HowMuch는 로그인 없이 바로 사용할 수 있는 정적 계산·단위 변환 웹사이트입니다. 모든 계산은 브라우저에서 처리하며 Astro로 정적 빌드한 뒤 Cloudflare Workers Static Assets에 배포합니다.
+HowMuch는 로그인 없이 바로 사용할 수 있는 정적 계산·단위 변환 웹사이트입니다. 모든 계산은 브라우저에서 처리하며 Astro로 정적 빌드한 뒤 Cloudflare Pages에 배포합니다.
 
 ## 기술 스택
 
 - Astro
 - TypeScript
 - Tailwind CSS
-- Cloudflare Workers Static Assets
+- Cloudflare Pages
 - GitHub Actions
 
 ## MVP 도구
@@ -35,63 +35,34 @@ npm run dev
 npm run build
 ```
 
-Cloudflare Workers 환경으로 미리보기:
+## Cloudflare Pages 배포
 
-```bash
-npm run preview:cf
-```
+Cloudflare Dashboard에서 다음 순서로 설정합니다.
 
-## Cloudflare Workers 배포
+1. Workers & Pages → Create application
+2. **Pages 탭 선택**
+3. Import an existing Git repository
+4. GitHub의 `dh1180/HowMuch` 선택
+5. 아래 빌드 설정 입력
 
-정적 파일은 `wrangler.jsonc`의 `assets.directory = "./dist"` 설정으로 배포합니다. 별도의 Worker 스크립트나 Astro Cloudflare 어댑터는 사용하지 않습니다.
+- Production branch: `main`
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Root directory: `/`
 
-### 1. Cloudflare 인증값 준비
+이 저장소에는 Workers용 `wrangler.jsonc`를 두지 않습니다. Cloudflare Pages 프로젝트로 직접 연결하는 구성을 기준으로 합니다.
 
-Cloudflare Dashboard에서 Workers 배포용 API Token과 Account ID를 준비합니다.
+## Custom Domain
 
-### 2. GitHub Actions Secrets 등록
+Pages 프로젝트가 생성된 뒤 Custom domains에서 원하는 서브도메인을 먼저 등록합니다.
 
-Repository → Settings → Secrets and variables → Actions → Secrets에 아래 두 값을 등록합니다.
+예: `how-much.kro.kr`
 
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
+외부 DNS 제공자를 사용하는 서브도메인은 해당 제공자에서 CNAME을 Pages 주소로 연결합니다.
 
-### 3. 실제 사이트 주소 등록
+`how-much.kro.kr → <project>.pages.dev`
 
-Repository → Settings → Secrets and variables → Actions → Variables에 아래 값을 등록합니다.
-
-- `SITE_URL`: 실제 공개 주소
-  - 예: `https://howmuch.example.com`
-  - 또는 최초 배포 후 발급된 `workers.dev` 주소
-
-`SITE_URL`이 설정되면 canonical, Open Graph URL, sitemap, robots.txt가 동일한 주소를 사용합니다.
-
-### 4. 자동 배포
-
-`main` 브랜치에 push하면 `.github/workflows/deploy.yml`이 실행됩니다.
-
-Cloudflare Secrets가 아직 없으면 빌드까지만 수행하고 배포 단계는 자동으로 건너뜁니다.
-
-수동 배포도 가능합니다.
-
-```bash
-npm run deploy
-```
-
-로컬 CLI 배포 시에는 먼저 다음 명령으로 Cloudflare 인증을 완료합니다.
-
-```bash
-npx wrangler login
-```
-
-## 배포 설정
-
-`wrangler.jsonc`:
-
-- Worker name: `howmuch`
-- Static assets: `./dist`
-- Custom 404: `404-page`
-- HTML handling: `auto-trailing-slash`
+중요: DNS에서 CNAME을 먼저 만들기 전에 Cloudflare Pages의 Custom domains에 해당 도메인을 먼저 등록합니다.
 
 ## SEO
 
@@ -101,6 +72,10 @@ npx wrangler login
 - sitemap 자동 생성
 - robots.txt 자동 생성
 - 1200×630 Open Graph 기본 이미지
+
+실제 공개 주소가 확정되면 Cloudflare Pages Build variables에 `SITE_URL`을 등록합니다.
+
+예: `SITE_URL=https://how-much.kro.kr`
 
 ## 커밋 규칙
 
