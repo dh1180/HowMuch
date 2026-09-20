@@ -1,0 +1,177 @@
+---
+import ToolLayout from "../components/ToolLayout.astro";
+---
+<ToolLayout
+  title="학점 평균 계산"
+  description="과목별 이수학점과 평점을 반영해 학점 가중 평균(GPA)을 계산합니다."
+  category="학교"
+  note="학교별 성적 산정·반올림·P/F 처리 규정은 다를 수 있습니다. 공식 성적은 소속 대학의 학사 규정을 확인하세요."
+>
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <label class="w-36">
+      <span class="label">평점 만점</span>
+      <select id="scale" class="input">
+        <option value="4.5">4.5</option>
+        <option value="4.3">4.3</option>
+      </select>
+    </label>
+    <button id="add-course" type="button" class="btn btn-soft">+ 과목 추가</button>
+  </div>
+
+  <div class="mt-5 overflow-x-auto">
+    <table class="w-full min-w-[520px] text-sm">
+      <thead>
+        <tr class="text-left text-slate-500 border-b border-slate-200">
+          <th class="pb-2 font-bold">과목</th>
+          <th class="pb-2 font-bold w-28">이수학점</th>
+          <th class="pb-2 font-bold w-28">평점</th>
+          <th class="pb-2 w-12"><span class="sr-only">삭제</span></th>
+        </tr>
+      </thead>
+      <tbody id="course-body"></tbody>
+    </table>
+  </div>
+
+  <div class="result-box mt-5" aria-live="polite">
+    <p class="text-sm font-bold text-indigo-700">가중 평균 GPA</p>
+    <p id="result" class="result-value mt-1">0.00 / 4.5</p>
+    <p id="detail" class="mt-2 text-sm text-slate-600">총 0학점</p>
+  </div>
+  <div class="mt-4 flex justify-end">
+    <button id="reset" type="button" class="text-sm font-bold text-slate-500 hover:text-rose-600">초기화</button>
+  </div>
+
+  <script>
+    type Course = { name: string; credits: number; grade: number };
+
+    const body = document.querySelector<HTMLTableSectionElement>("#course-body")!;
+    const scale = document.querySelector<HTMLSelectElement>("#scale")!;
+    const result = document.querySelector<HTMLElement>("#result")!;
+    const detail = document.querySelector<HTMLElement>("#detail")!;
+    const storageKey = "howmuch:gpa-courses";
+
+    let courses: Course[] = [
+      { name: "과목 1", credits: 3, grade: 4.5 },
+      { name: "과목 2", credits: 3, grade: 4.0 },
+      { name: "과목 3", credits: 2, grade: 3.5 },
+    ];
+
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) courses = JSON.parse(saved);
+      const savedScale = localStorage.getItem(storageKey + ":scale");
+      if (savedScale === "4.3" || savedScale === "4.5") scale.value = savedScale;
+    } catch {}
+
+    function persist() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(courses));
+        localStorage.setItem(storageKey + ":scale", scale.value);
+      } catch {}
+    }
+
+    function calculate() {
+      const max = Number(scale.value);
+      let credits = 0;
+      let points = 0;
+
+      courses.forEach((course) => {
+        const validCredits = Number.isFinite(course.credits) && course.credits > 0 ? course.credits : 0;
+        const validGrade = Number.isFinite(course.grade) ? Math.min(Math.max(course.grade, 0), max) : 0;
+        credits += validCredits;
+        points += validCredits * validGrade;
+      });
+
+      const gpa = credits > 0 ? points / credits : 0;
+      result.textContent = `${gpa.toFixed(2)} / ${max.toFixed(1)}`;
+      detail.textContent = `총 ${new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 1 }).format(credits)}학점`;
+      persist();
+    }
+
+    function render() {
+      body.innerHTML = "";
+      courses.forEach((course, index) => {
+        const row = document.createElement("tr");
+        row.className = "border-b border-slate-100";
+
+        const nameCell = document.createElement("td");
+        nameCell.className = "py-2 pr-2";
+        const nameInput = document.createElement("input");
+        nameInput.className = "input !py-2.5 course-name";
+        nameInput.value = course.name;
+        nameInput.setAttribute("aria-label", `${index + 1}번째 과목명`);
+        nameInput.addEventListener("input", () => {
+          courses[index].name = nameInput.value;
+          persist();
+        });
+        nameCell.appendChild(nameInput);
+
+        const creditCell = document.createElement("td");
+        creditCell.className = "py-2 pr-2";
+        const creditInput = document.createElement("input");
+        creditInput.className = "input !py-2.5 course-credit";
+        creditInput.type = "number";
+        creditInput.min = "0";
+        creditInput.step = "0.5";
+        creditInput.value = String(course.credits);
+        creditInput.setAttribute("aria-label", `${index + 1}번째 이수학점`);
+        creditInput.addEventListener("input", () => {
+          courses[index].credits = Number(creditInput.value);
+          calculate();
+        });
+        creditCell.appendChild(creditInput);
+
+        const gradeCell = document.createElement("td");
+        gradeCell.className = "py-2 pr-2";
+        const gradeInput = document.createElement("input");
+        gradeInput.className = "input !py-2.5 course-grade";
+        gradeInput.type = "number";
+        gradeInput.min = "0";
+        gradeInput.max = scale.value;
+        gradeInput.step = "0.1";
+        gradeInput.value = String(course.grade);
+        gradeInput.setAttribute("aria-label", `${index + 1}번째 평점`);
+        gradeInput.addEventListener("input", () => {
+          courses[index].grade = Number(gradeInput.value);
+          calculate();
+        });
+        gradeCell.appendChild(gradeInput);
+
+        const deleteCell = document.createElement("td");
+        deleteCell.className = "py-2 text-right";
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "w-9 h-9 rounded-lg hover:bg-rose-50 hover:text-rose-600";
+        deleteButton.textContent = "×";
+        deleteButton.setAttribute("aria-label", `${index + 1}번째 과목 삭제`);
+        deleteButton.addEventListener("click", () => {
+          courses.splice(index, 1);
+          render();
+        });
+        deleteCell.appendChild(deleteButton);
+
+        row.append(nameCell, creditCell, gradeCell, deleteCell);
+        body.appendChild(row);
+      });
+      calculate();
+    }
+
+    document.querySelector("#add-course")?.addEventListener("click", () => {
+      courses.push({ name: `과목 ${courses.length + 1}`, credits: 3, grade: Number(scale.value) });
+      render();
+    });
+
+    scale.addEventListener("change", () => {
+      const max = Number(scale.value);
+      courses = courses.map((course) => ({ ...course, grade: Math.min(course.grade, max) }));
+      render();
+    });
+
+    document.querySelector("#reset")?.addEventListener("click", () => {
+      courses = [{ name: "과목 1", credits: 3, grade: Number(scale.value) }];
+      render();
+    });
+
+    render();
+  </script>
+</ToolLayout>
