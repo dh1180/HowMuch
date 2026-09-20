@@ -1,0 +1,19 @@
+---
+import type { ToolItem } from "../data/tools";
+const { tool } = Astro.props as { tool: ToolItem };
+---
+<a
+  href={tool.href}
+  class="tool-card card p-5 block transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_50px_rgba(23,32,51,.09)]"
+  data-name={tool.name}
+  data-category={tool.category}
+  data-keywords={tool.keywords.join(" ")}
+>
+  <div class="flex items-start justify-between gap-3">
+    <span class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-700 grid place-items-center font-extrabold text-lg">{tool.icon}</span>
+    <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">{tool.category}</span>
+  </div>
+  <h2 class="mt-5 text-lg font-extrabold tracking-tight">{tool.name}</h2>
+  <p class="mt-2 text-sm leading-6 text-slate-600">{tool.description}</p>
+  <div class="mt-5 pt-4 border-t border-slate-100 text-sm font-semibold text-indigo-700">{tool.example}</div>
+</a>
