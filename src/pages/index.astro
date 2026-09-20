@@ -4,73 +4,97 @@ import ToolCard from "../components/ToolCard.astro";
 import { categories, tools } from "../data/tools";
 ---
 <BaseLayout>
-  <section class="shell pt-14 md:pt-20">
-    <div class="max-w-3xl">
-      <span class="inline-flex items-center gap-2 text-sm font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-full">⚡ 빠르고 간단한 생활 계산기</span>
-      <h1 class="mt-5 text-4xl md:text-6xl font-black tracking-[-.055em] leading-[1.05]">
-        이거, <span class="text-indigo-600">몇이야?</span>
-      </h1>
-      <p class="mt-5 text-lg md:text-xl leading-8 text-slate-600">
-        평부터 인터넷 속도, 데이터 용량, 연비, 학점까지.<br class="hidden sm:block" />
-        검색하고 입력하면 바로 계산됩니다.
-      </p>
-    </div>
+  <section class="hero-wrap">
+    <div class="shell">
+      <div class="hero-panel">
+        <div class="hero-copy">
+          <span class="hero-eyebrow">⚡ 자주 쓰는 계산을 한곳에서</span>
+          <h1>이거, <span>몇이야?</span></h1>
+          <p>
+            평부터 인터넷 속도, 데이터 용량, 연비, 학점까지.<br class="hidden sm:block" />
+            필요한 값을 입력하면 바로 계산됩니다.
+          </p>
+        </div>
 
-    <div class="mt-9 max-w-3xl card p-3 flex items-center gap-3 focus-within:ring-4 focus-within:ring-indigo-100 transition">
-      <span class="pl-2 text-slate-400" aria-hidden="true">⌕</span>
-      <input id="tool-search" type="search" placeholder="예: 평, 500Mbps, 학점, 온도" class="w-full bg-transparent outline-none py-2.5 text-base" autocomplete="off" />
-      <kbd class="hidden sm:inline-flex text-[11px] text-slate-400 border border-slate-200 rounded-lg px-2 py-1">/</kbd>
-    </div>
+        <div class="hero-search">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input
+            id="tool-search"
+            type="search"
+            placeholder="평, 500Mbps, 학점, 온도 검색"
+            autocomplete="off"
+          />
+          <kbd>/</kbd>
+        </div>
 
-    <div class="mt-5 flex gap-2 overflow-x-auto pb-1" id="category-filter" aria-label="도구 카테고리">
-      {categories.map((category, index) => (
-        <button
-          type="button"
-          data-category={category}
-          class:list={[
-            "category-btn shrink-0 px-4 py-2 rounded-full text-sm font-bold border transition",
-            index === 0 ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300",
-          ]}
-        >
-          {category}
-        </button>
-      ))}
+        <div class="category-scroller" id="category-filter" aria-label="도구 카테고리">
+          {categories.map((category, index) => (
+            <button
+              type="button"
+              data-category={category}
+              class:list={[
+                "category-btn",
+                index === 0 ? "is-active" : "",
+              ]}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="shell mt-9" aria-labelledby="tools-title">
-    <div class="flex items-end justify-between gap-4 mb-4">
+  <section class="shell tools-section" aria-labelledby="tools-title">
+    <div class="section-heading">
       <div>
-        <h2 id="tools-title" class="text-xl font-extrabold tracking-tight">자주 쓰는 도구</h2>
-        <p id="tool-count" class="text-sm text-slate-500 mt-1">{tools.length}개의 도구</p>
+        <p class="section-kicker">TOOLS</p>
+        <h2 id="tools-title">자주 쓰는 도구</h2>
       </div>
+      <p id="tool-count">{tools.length}개의 도구</p>
     </div>
+
     <div class="tool-grid" id="tool-grid">
       {tools.map((tool) => <ToolCard tool={tool} />)}
     </div>
-    <div id="empty-state" class="hidden card py-14 px-6 text-center">
-      <p class="font-extrabold text-lg">찾는 도구가 아직 없어요.</p>
-      <p class="mt-2 text-sm text-slate-500">다른 검색어로 찾아보세요.</p>
+
+    <div id="empty-state" class="hidden empty-state">
+      <div class="empty-icon">⌕</div>
+      <p class="empty-title">찾는 도구가 아직 없어요.</p>
+      <p class="empty-description">다른 검색어로 다시 찾아보세요.</p>
     </div>
   </section>
 
-  <section id="about" class="shell mt-20">
-    <div class="card p-6 md:p-8 grid md:grid-cols-3 gap-6">
-      <div>
-        <div class="text-2xl">⚡</div>
-        <h3 class="font-extrabold mt-3">즉시 계산</h3>
-        <p class="text-sm leading-6 text-slate-600 mt-2">페이지를 오가는 과정 없이 입력하는 순간 결과를 확인합니다.</p>
-      </div>
-      <div>
-        <div class="text-2xl">◫</div>
-        <h3 class="font-extrabold mt-3">로그인 없음</h3>
-        <p class="text-sm leading-6 text-slate-600 mt-2">계정 생성 없이 바로 사용할 수 있습니다.</p>
-      </div>
-      <div>
-        <div class="text-2xl">⌁</div>
-        <h3 class="font-extrabold mt-3">브라우저에서 처리</h3>
-        <p class="text-sm leading-6 text-slate-600 mt-2">입력한 값은 계산을 위해 외부 서버로 전송하지 않습니다.</p>
-      </div>
+  <section id="about" class="shell about-section">
+    <div class="about-heading">
+      <p class="section-kicker">WHY HOWMUCH</p>
+      <h2>계산만 빠르게, 나머지는 가볍게.</h2>
+    </div>
+
+    <div class="feature-grid">
+      <article class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <div>
+          <h3>즉시 계산</h3>
+          <p>입력하는 순간 결과를 바로 확인할 수 있습니다.</p>
+        </div>
+      </article>
+
+      <article class="feature-card">
+        <span class="feature-icon">○</span>
+        <div>
+          <h3>로그인 없음</h3>
+          <p>회원가입이나 계정 생성 없이 바로 사용할 수 있습니다.</p>
+        </div>
+      </article>
+
+      <article class="feature-card">
+        <span class="feature-icon">⌁</span>
+        <div>
+          <h3>브라우저에서 처리</h3>
+          <p>입력한 값은 계산을 위해 외부 서버로 전송하지 않습니다.</p>
+        </div>
+      </article>
     </div>
   </section>
 
@@ -90,11 +114,15 @@ import { categories, tools } from "../data/tools";
 
       cards.forEach((card) => {
         const haystack = normalize(
-          [card.dataset.name, card.dataset.category, card.dataset.keywords].filter(Boolean).join(" ")
+          [card.dataset.name, card.dataset.category, card.dataset.keywords]
+            .filter(Boolean)
+            .join(" ")
         );
-        const categoryMatch = activeCategory === "전체" || card.dataset.category === activeCategory;
+        const categoryMatch =
+          activeCategory === "전체" || card.dataset.category === activeCategory;
         const searchMatch = !query || haystack.includes(query);
         const show = categoryMatch && searchMatch;
+
         card.classList.toggle("hidden", !show);
         if (show) visible++;
       });
@@ -104,22 +132,25 @@ import { categories, tools } from "../data/tools";
     }
 
     search?.addEventListener("input", filterTools);
-    buttons.forEach((button) => button.addEventListener("click", () => {
-      activeCategory = button.dataset.category ?? "전체";
-      buttons.forEach((b) => {
-        const selected = b === button;
-        b.classList.toggle("bg-slate-900", selected);
-        b.classList.toggle("text-white", selected);
-        b.classList.toggle("border-slate-900", selected);
-        b.classList.toggle("bg-white", !selected);
-        b.classList.toggle("text-slate-600", !selected);
-        b.classList.toggle("border-slate-200", !selected);
-      });
-      filterTools();
-    }));
+
+    buttons.forEach((button) =>
+      button.addEventListener("click", () => {
+        activeCategory = button.dataset.category ?? "전체";
+
+        buttons.forEach((item) => {
+          item.classList.toggle("is-active", item === button);
+        });
+
+        filterTools();
+      })
+    );
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "/" && document.activeElement?.tagName !== "INPUT") {
+      if (
+        event.key === "/" &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
         event.preventDefault();
         search?.focus();
       }
