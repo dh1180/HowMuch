@@ -198,6 +198,9 @@ HowMuch/
 │   └── styles/
 │       └── global.css
 │
+├── functions/
+│   └── _middleware.js       # www → 대표 도메인 301 redirect
+│
 ├── .github/workflows/
 │   └── ci.yml
 ├── astro.config.mjs
@@ -271,11 +274,13 @@ dist/
 
 ### Custom Domain
 
-현재 서비스 도메인:
+현재 서비스 대표 도메인:
 
 ```text
 https://how-much.kro.kr
 ```
+
+`https://www.how-much.kro.kr`도 Pages에 연결되어 있으며, `functions/_middleware.js`에서 경로와 쿼리 문자열을 유지한 채 대표 도메인으로 **301 redirect**합니다.
 
 외부 DNS에서 Pages 프로젝트 주소를 CNAME으로 연결합니다.
 
@@ -287,13 +292,11 @@ howmuch-aoh.pages.dev
 
 Cloudflare Pages의 Custom Domains에 도메인을 먼저 등록한 후 DNS 레코드를 설정합니다.
 
-### SITE_URL
+### Canonical Domain
 
-배포 환경의 `SITE_URL`은 canonical, Open Graph URL, sitemap, robots.txt 생성에 사용합니다.
+`astro.config.mjs`의 `site`는 대표 주소인 `https://how-much.kro.kr`로 고정되어 있습니다.
 
-```env
-SITE_URL=https://how-much.kro.kr
-```
+canonical, Open Graph URL, sitemap, robots.txt는 모두 이 대표 도메인을 기준으로 생성됩니다.
 
 ---
 
