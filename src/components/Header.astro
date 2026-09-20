@@ -1,0 +1,15 @@
+---
+const path = Astro.url.pathname;
+---
+<header class="border-b border-slate-200/80 bg-white/75 backdrop-blur-xl sticky top-0 z-50">
+  <div class="shell h-16 flex items-center justify-between gap-4">
+    <a href="/" class="flex items-center gap-2.5" aria-label="HowMuch 홈">
+      <span class="w-9 h-9 rounded-xl bg-indigo-600 text-white grid place-items-center font-black text-sm">H?</span>
+      <span class="font-extrabold tracking-tight text-lg">HowMuch</span>
+    </a>
+    <nav class="flex items-center gap-1 text-sm font-semibold text-slate-600" aria-label="주요 메뉴">
+      <a href="/" class:list={["px-3 py-2 rounded-lg hover:bg-slate-100", path === "/" && "text-indigo-700 bg-indigo-50"]}>도구</a>
+      <a href="/#about" class="px-3 py-2 rounded-lg hover:bg-slate-100">소개</a>
+    </nav>
+  </div>
+</header>
